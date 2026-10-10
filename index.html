@@ -131,7 +131,21 @@ function hearts(n){
 // เพลง: วางไฟล์ song.mp3 ไว้ข้าง index.html แล้วจะเล่นหลังกดปุ่มรัก
 var bgm=document.getElementById('bgm'), mb=document.getElementById('mute'), on=false;
 bgm.addEventListener('error',function(){mb.hidden=true});
+var warmed=false, wanted=false;
+// iOS Safari ไม่โหลดเสียงล่วงหน้า จึงแอบเริ่มโหลดตอนแตะครั้งแรก (เสียงปิดไว้) เพื่อให้พร้อมเล่นตอนกดปุ่มรัก
+function warm(){
+  if(warmed)return; warmed=true;
+  bgm.muted=true;
+  var w=bgm.play();
+  if(w&&w.then){w.then(function(){
+    if(!wanted){bgm.pause();bgm.currentTime=0;}
+    bgm.muted=false;
+  }).catch(function(){bgm.muted=false});}
+}
+document.addEventListener('pointerdown',warm,{once:true});
+document.addEventListener('touchstart',warm,{once:true,passive:true});
 function startMusic(){
+  wanted=true; bgm.muted=false;
   var p=bgm.play();
   if(p&&p.then){p.then(function(){on=true;mb.hidden=false;mb.textContent='🔊'}).catch(function(){mb.hidden=true})}
 }
